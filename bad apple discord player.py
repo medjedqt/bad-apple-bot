@@ -3,6 +3,8 @@ from discord.ext import commands, tasks
 import time
 from PIL import Image
 
+import config
+
 CLIP_FRAMES = 6571
 
 CLIP_LENGTH = 219.0666
@@ -103,4 +105,4 @@ async def bad(ctx):
         return await ctx.send("bad apple is already playing!")
     badloop.start()
 
-bot.run('NTg3OTMxMjE4MTQ2ODg1NjQy.XqBISw._04H2XkhciT2n6yw8qzlQJWxHfM')#<--- Put bot token here
+bot.run(config.DATA['token'])#<--- Put bot token here
