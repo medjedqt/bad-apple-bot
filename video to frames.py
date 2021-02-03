@@ -11,8 +11,11 @@ def FrameCapture(path):
     while success: 
 
         success, image = vidObj.read() 
-  
-        cv2.imwrite("frame%d.jpg" % count, image)
+
+        try:
+            cv2.imwrite("frames/frame%d.jpg" % count, image)
+        except:
+            pass
   
         count += 1
   
