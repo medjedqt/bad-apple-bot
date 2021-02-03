@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands, tasks
 import time
 from PIL import Image
 
@@ -55,43 +56,51 @@ def runner(path):
 frames = []
 
 for i in range(0, int(CLIP_FRAMES/4)+1):
-    path = "frames/frame"+str(i*4)+".png" #<--- path to folder containing every frame of the video
+    path = "frames/frame"+str(i*4)+".jpg" #<--- path to folder containing every frame of the video
     frames.append(runner(path))
 
-client = discord.Client()
+bot = commands.Bot(command_prefix="?", help_command=None)
 
-@client.event
+@bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
+    print('We have logged in as {0.user}'.format(bot))
 
-@client.event
-async def on_message(message):
+@tasks.loop(count=1)
+async def badloop():
+    chan = bot.get_channel(806448950726754304)
+    mes: discord.Message = await chan.send("initiating bad apple...")
+    oldTimestamp = time.time()
 
-    if message.content.startswith('!bad apple'):
+    start = oldTimestamp
+
+    i = 0
         
-        oldTimestamp = time.time()
+    while i < len(frames)-1:
+        disp = False
+        while not disp:
+            newTimestamp = time.time()
+            if (newTimestamp - oldTimestamp) >= TIMEOUT:
 
-        start = oldTimestamp
-
-        seconds = 0
-        minutes = 0
-
-        i = 0
-        
-        while i < len(frames)-1:
-            disp = False
-            while not disp:
+                await mes.edit(content=frames[int(i)])
+                    
                 newTimestamp = time.time()
-                if (newTimestamp - oldTimestamp) >= TIMEOUT:
 
-                    await message.channel.send(frames[int(i)])
+                i += (newTimestamp - oldTimestamp)/TIMEOUT
                     
-                    newTimestamp = time.time()
+                oldTimestamp = newTimestamp
 
-                    i += (newTimestamp - oldTimestamp)/TIMEOUT
-                    
-                    oldTimestamp = newTimestamp
+                disp = True
+    await mes.edit(content="- The End -")
 
-                    disp = True
+def medjed(ctx):
+    return ctx.author.id == 550076298937237544
 
-client.run('')#<--- Put bot token here
+@bot.command()
+@commands.check(medjed)
+@commands.max_concurrency(1)
+async def bad(ctx):
+    if badloop.is_running():
+        return await ctx.send("bad apple is already playing!")
+    badloop.start()
+
+bot.run('NTg3OTMxMjE4MTQ2ODg1NjQy.XqBISw._04H2XkhciT2n6yw8qzlQJWxHfM')#<--- Put bot token here
